@@ -9,19 +9,21 @@ public class GenericRepository<T> : IGenericRepository<T> where T : BaseEntity
 {
     Conexion conexion = Conexion.GetInstance();
     private T _entity;
+    private Type _type;
+    private PropertyInfo[] _propertyInfos;
     public GenericRepository()
     {
         _entity = Activator.CreateInstance<T>();
+        _type = _entity.GetType();
+        _propertyInfos = _type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
     }
     public virtual async Task<List<T>> List()
     {
         SqlConnection a = conexion.StablishConexion();
         List<T> values = new();
-        Type type = _entity.GetType();
-        PropertyInfo[] propertyInfos = type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
-        SqlCommand command = new SqlCommand("SELECT " + String.Join(", ", propertyInfos.Select(e => e.Name)) + " FROM " + type.Name, a);
+        SqlCommand command = new SqlCommand("SELECT " + String.Join(", ", _propertyInfos.Select(e => e.Name)) + " FROM " + _type.Name, a);
 
-        foreach (PropertyInfo property in propertyInfos)
+        foreach (PropertyInfo property in _propertyInfos)
         {
             command.Parameters.AddWithValue(property.Name, property.Name);
         }
@@ -30,7 +32,7 @@ public class GenericRepository<T> : IGenericRepository<T> where T : BaseEntity
             while (read.Read())
             {
                 T Instance = Activator.CreateInstance<T>();
-                foreach (PropertyInfo property in propertyInfos)
+                foreach (PropertyInfo property in _propertyInfos)
                 {
 
                     property.SetValue(Instance, read[property.Name]);
@@ -44,20 +46,18 @@ public class GenericRepository<T> : IGenericRepository<T> where T : BaseEntity
     public virtual T GetOne(int id)
     {
         SqlConnection connection = conexion.StablishConexion();
-        Type type = _entity.GetType();
-        PropertyInfo[] property = type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
         T data = Activator.CreateInstance<T>();
-        using (SqlCommand command = new("SELECT " + String.Join(", ", property.Select(e => e.Name)) +
-        " FROM " + type.Name + " WHERE Id = '" + id + "'", connection))
+        using (SqlCommand command = new("SELECT " + String.Join(", ", _propertyInfos.Select(e => e.Name)) +
+        " FROM " + _type.Name + " WHERE Id = '" + id + "'", connection))
         {
-            foreach (PropertyInfo propert in property)
+            foreach (PropertyInfo propert in _propertyInfos)
             {
                 command.Parameters.AddWithValue(propert.Name, propert.Name);
             }
             using SqlDataReader read = command.ExecuteReader();
             while (read.Read())
             {
-                foreach (PropertyInfo property1 in property)
+                foreach (PropertyInfo property1 in _propertyInfos)
                 {
                     if (read[property1.Name] != DBNull.Value)
                     {
@@ -72,12 +72,10 @@ public class GenericRepository<T> : IGenericRepository<T> where T : BaseEntity
     public virtual void Add(T Entity)
     {
         SqlConnection sqlConnection = conexion.StablishConexion();
-        Type entityType = Entity.GetType();
-        PropertyInfo[] properties = entityType.GetProperties(BindingFlags.Public | BindingFlags.Instance);
-        List<string> nameProp = properties.Where(e => e.Name != "Id").Select(e => e.Name).ToList();
-        using (SqlCommand command = new SqlCommand($"INSERT INTO {entityType.Name}({String.Join(",", nameProp)}) VALUES ({String.Join(",", nameProp.Select(e => $"@{e}"))})", sqlConnection))
+        List<string> nameProp = _propertyInfos.Where(e => e.Name != "Id").Select(e => e.Name).ToList();
+        using (SqlCommand command = new SqlCommand($"INSERT INTO {_type.Name}({String.Join(",", nameProp)}) VALUES ({String.Join(",", nameProp.Select(e => $"@{e}"))})", sqlConnection))
         {
-            foreach (PropertyInfo prop in properties)
+            foreach (PropertyInfo prop in _propertyInfos)
             {
                 if (prop.Name != "Id")
                 {
@@ -87,6 +85,15 @@ public class GenericRepository<T> : IGenericRepository<T> where T : BaseEntity
             }
             command.ExecuteNonQuery();
         }
-
+    }
+    public virtual void DeleteOne(int id){
+        T data = GetOne(id);
+        if(data != null){
+            SqlConnection sqlConnection = conexion.StablishConexion();
+            string Consulta = $"DELETE FROM {_type.Name} WHERE id = {id}";
+            using(SqlCommand command = new SqlCommand(Consulta, sqlConnection)){
+                command.ExecuteNonQuery();
+            }
+        }
     }
 }
