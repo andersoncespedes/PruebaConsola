@@ -96,4 +96,20 @@ public class GenericRepository<T> : IGenericRepository<T> where T : BaseEntity
             }
         }
     }
+
+    public void Update(T Entity)
+    {
+        SqlConnection con = conexion.StablishConexion();
+        string query = $"UPDATE {_type.Name} SET {String.Join(",", _propertyInfos.Where(e => e.Name != "Id").Select(e => $"{e.Name} = @{e.Name}")  )} WHERE Id = {Entity.Id}";
+        Console.WriteLine(query);
+        using(SqlCommand command = new SqlCommand(query, con))
+        {
+            foreach(PropertyInfo prop in _propertyInfos){
+                if (prop.Name != "Id"){
+                    command.Parameters.AddWithValue("@" + prop.Name, prop.GetValue(Entity));
+                }
+            }
+            command.ExecuteNonQuery();
+        }
+    }
 }

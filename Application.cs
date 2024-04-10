@@ -12,7 +12,7 @@ public static class Application
     {
         IJourneyRepository gen = new JourneyRepository();
         int opcion = 0;
-        while (opcion != 5)
+        while (opcion != 6)
         {
             Console.WriteLine("1-5");
             opcion = int.Parse(Console.ReadLine());
@@ -57,6 +57,31 @@ public static class Application
                     if (int.TryParse(Console.ReadLine(), out int idx))
                     {
                         gen.DeleteOne(idx);
+                    }
+                    break;
+                case 5:
+                    Console.Write("Inserta la id -> ");
+                    if (int.TryParse(Console.ReadLine(), out int ida))
+                    {
+                        Journies flights = gen.GetOne(ida);
+                        if (flights == null) break;
+                        else
+                        {
+                            Console.Write("Origin -> ");
+                            flights.Origin = Console.ReadLine();
+                            Console.Write("Price -> ");
+                            if (double.TryParse(Console.ReadLine(), out double prices))
+                            {
+                                flights.Price = prices;
+                            }
+                            else
+                            {
+                                flights.Price = 0;
+                            }
+                            Console.Write("Destination -> ");
+                            flights.Destination = Console.ReadLine();
+                            gen.Update(flights);
+                        }
                     }
                     break;
                 default:
