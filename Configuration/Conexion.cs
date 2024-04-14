@@ -36,7 +36,7 @@ public class Conexion
             return null;
         }
     }
-    public async Task DisableConecction(SqlConnection sql){
-        await sql.CloseAsync();
+    public void DisableConecction(SqlConnection sql){
+         sql.Close();
     }
 }

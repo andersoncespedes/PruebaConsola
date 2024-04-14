@@ -40,7 +40,7 @@ public class GenericRepository<T> : IGenericRepository<T> where T : BaseEntity
                 values.Add(Instance);
             }
         }
-        await conexion.DisableConecction(a);
+        conexion.DisableConecction(a);
         return values;
     }
     public virtual T GetOne(int id)
@@ -67,6 +67,8 @@ public class GenericRepository<T> : IGenericRepository<T> where T : BaseEntity
                 }
             }
         }
+        conexion.DisableConecction(connection);
+
         return data;
     }
     public virtual void Add(T Entity)
@@ -79,37 +81,47 @@ public class GenericRepository<T> : IGenericRepository<T> where T : BaseEntity
             {
                 if (prop.Name != "Id")
                 {
-                    command.Parameters.AddWithValue("@"+prop.Name, prop.GetValue(Entity));
-                    Console.WriteLine(String.Join(",",nameProp.Select(e => $"@{e}")));
+                    command.Parameters.AddWithValue("@" + prop.Name, prop.GetValue(Entity));
+                    Console.WriteLine(String.Join(",", nameProp.Select(e => $"@{e}")));
                 }
             }
             command.ExecuteNonQuery();
         }
+        conexion.DisableConecction(sqlConnection);
     }
-    public virtual void DeleteOne(int id){
+    public virtual void DeleteOne(int id)
+    {
         T data = GetOne(id);
-        if(data != null){
+        if (data != null)
+        {
             SqlConnection sqlConnection = conexion.StablishConexion();
             string Consulta = $"DELETE FROM {_type.Name} WHERE id = {id}";
-            using(SqlCommand command = new SqlCommand(Consulta, sqlConnection)){
+            using (SqlCommand command = new SqlCommand(Consulta, sqlConnection))
+            {
                 command.ExecuteNonQuery();
             }
+            conexion.DisableConecction(sqlConnection);
+
         }
     }
 
     public void Update(T Entity)
     {
         SqlConnection con = conexion.StablishConexion();
-        string query = $"UPDATE {_type.Name} SET {String.Join(",", _propertyInfos.Where(e => e.Name != "Id").Select(e => $"{e.Name} = @{e.Name}")  )} WHERE Id = {Entity.Id}";
+        string query = $"UPDATE {_type.Name} SET {String.Join(",", _propertyInfos.Where(e => e.Name != "Id").Select(e => $"{e.Name} = @{e.Name}"))} WHERE Id = {Entity.Id}";
         Console.WriteLine(query);
-        using(SqlCommand command = new SqlCommand(query, con))
+        using (SqlCommand command = new SqlCommand(query, con))
         {
-            foreach(PropertyInfo prop in _propertyInfos){
-                if (prop.Name != "Id"){
+            foreach (PropertyInfo prop in _propertyInfos)
+            {
+                if (prop.Name != "Id")
+                {
                     command.Parameters.AddWithValue("@" + prop.Name, prop.GetValue(Entity));
                 }
             }
             command.ExecuteNonQuery();
         }
+            conexion.DisableConecction(con);
+
     }
 }

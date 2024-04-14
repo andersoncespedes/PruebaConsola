@@ -21,3 +21,4 @@ C:\Users\ander\OneDrive\Documentos\Proyectos C#\PruebaConsole\bin\Debug\net8.0\r
 C:\Users\ander\OneDrive\Documentos\Proyectos C#\PruebaConsole\obj\Debug\net8.0\PruebaConsole.csproj.AssemblyReference.cache
 C:\Users\ander\OneDrive\Documentos\Proyectos C#\PruebaConsole\obj\Debug\net8.0\PruebaCo.B0BA17EC.Up2Date
 C:\Users\ander\OneDrive\Documentos\Proyectos C#\PruebaConsole\obj\Debug\net8.0\PruebaConsole.sourcelink.json
+C:\Users\ander\OneDrive\Documentos\Proyectos C#\PruebaConsole\bin\Debug\net8.0\Newtonsoft.Json.dll

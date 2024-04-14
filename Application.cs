@@ -1,92 +1,59 @@
-
+using System.Net;
+using System.Text.RegularExpressions;
 using PruebaConsole.Configuration;
-using PruebaConsole.Entity;
-using PruebaConsole.Interface;
-using PruebaConsole.Repository;
+using PruebaConsole.Controllers;
 
 namespace PruebaConsole;
+
 public static class Application
 {
     private static readonly Conexion _conexion = Conexion.GetInstance();
-    public static async void Run()
+    private static async Task MapControllers(HttpListener httpListener)
     {
-        IJourneyRepository gen = new JourneyRepository();
-        int opcion = 0;
-        while (opcion != 6)
+        JourneyController journeyController = new JourneyController();
+        HttpListenerContext context = httpListener.GetContext();
+        await HandleRequest(context);
+        var requestUrl = context.Request.Url.AbsolutePath;
+        if (requestUrl.StartsWith("/Journey"))
         {
-            Console.WriteLine("1-5");
-            opcion = int.Parse(Console.ReadLine());
-            switch (opcion)
+            if (context.Request.HttpMethod == "GET" && !Regex.IsMatch(requestUrl, @"^\/Journey\/\d+$"))
             {
-                case 1:
-                    foreach (Journies journies in await gen.List())
-                    {
-                        Console.Write(journies.Destination + " ");
-                        Console.Write(journies.Price + " ");
-                        Console.Write(journies.Id + " ");
-                        Console.WriteLine();
-                    }
-                    break;
-                case 2:
-                    Console.Write("Inserta la id -> ");
-                    if (int.TryParse(Console.ReadLine(), out int id))
-                    {
-                        Journies flights = gen.GetOne(id);
-                        Console.WriteLine(flights.Destination);
-                    }
-                    break;
-                case 3:
-                    Journies jouney = new Journies();
-                    Console.Write("Origin -> ");
-                    jouney.Origin = Console.ReadLine();
-                    Console.Write("Price -> ");
-                    if (double.TryParse(Console.ReadLine(), out double price))
-                    {
-                        jouney.Price = price;
-                    }
-                    else
-                    {
-                        jouney.Price = 0;
-                    }
-                    Console.Write("Destination -> ");
-                    jouney.Destination = Console.ReadLine();
-                    gen.Add(jouney);
-                    break;
-                case 4:
-                    Console.Write("Inserta la id -> ");
-                    if (int.TryParse(Console.ReadLine(), out int idx))
-                    {
-                        gen.DeleteOne(idx);
-                    }
-                    break;
-                case 5:
-                    Console.Write("Inserta la id -> ");
-                    if (int.TryParse(Console.ReadLine(), out int ida))
-                    {
-                        Journies flights = gen.GetOne(ida);
-                        if (flights == null) break;
-                        else
-                        {
-                            Console.Write("Origin -> ");
-                            flights.Origin = Console.ReadLine();
-                            Console.Write("Price -> ");
-                            if (double.TryParse(Console.ReadLine(), out double prices))
-                            {
-                                flights.Price = prices;
-                            }
-                            else
-                            {
-                                flights.Price = 0;
-                            }
-                            Console.Write("Destination -> ");
-                            flights.Destination = Console.ReadLine();
-                            gen.Update(flights);
-                        }
-                    }
-                    break;
-                default:
-                    break;
+                await journeyController.ListAll(context);
             }
+            else if (context.Request.HttpMethod == "GET" && Regex.IsMatch(requestUrl, @"^\/Journey\/\d+$"))
+            {
+                if (int.TryParse(requestUrl.Split("/").Last(), out var index))
+                {
+                    await journeyController.GetOne(context, index);
+                }
+
+            }
+            else if (context.Request.HttpMethod == "POST" && !Regex.IsMatch(requestUrl, @"^\/Journey\/\d+$"))
+            {
+                await journeyController.AddOne(context);
+            }
+        }
+    }
+    public static async Task HandleRequest(HttpListenerContext context)
+    {
+        // Permitir solicitudes desde cualquier origen
+        context.Response.AddHeader("Access-Control-Allow-Origin", "*");
+        // Permitir los métodos GET, POST, PUT y DELETE
+        context.Response.AddHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
+        // Permitir los encabezados Content-Type y Authorization
+        context.Response.AddHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+
+        // Tu lógica de manejo de solicitud aquí
+    }
+    public static async Task Run()
+    {
+        HttpListener httpListener = new HttpListener();
+        httpListener.Prefixes.Add("http://localhost:3002/");
+        
+        httpListener.Start();
+        while (true)
+        {
+            await MapControllers(httpListener);
         }
     }
 }
