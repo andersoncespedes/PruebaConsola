@@ -8,16 +8,16 @@ namespace PruebaConsole.Repository;
 public class GenericRepository<T> : IGenericRepository<T> where T : BaseEntity
 {
     Conexion conexion = Conexion.GetInstance();
-    private T _entity;
-    private Type _type;
-    private PropertyInfo[] _propertyInfos;
+    protected T _entity;
+    protected Type _type;
+    protected PropertyInfo[] _propertyInfos;
     public GenericRepository()
     {
         _entity = Activator.CreateInstance<T>();
         _type = _entity.GetType();
         _propertyInfos = _type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
     }
-    public virtual async Task<List<T>> List()
+    public virtual async  Task<List<T>> List()
     {
         SqlConnection a = conexion.StablishConexion();
         List<T> values = new();
@@ -27,7 +27,7 @@ public class GenericRepository<T> : IGenericRepository<T> where T : BaseEntity
         {
             command.Parameters.AddWithValue(property.Name, property.Name);
         }
-        using (SqlDataReader read = command.ExecuteReader())
+        using (SqlDataReader read = await command.ExecuteReaderAsync())
         {
             while (read.Read())
             {

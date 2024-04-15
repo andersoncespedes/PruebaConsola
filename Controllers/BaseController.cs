@@ -1,4 +1,5 @@
 
+using System;
 using System.Net;
 using System.Text;
 using Newtonsoft.Json;
@@ -21,13 +22,41 @@ public class BaseController<T> where T : BaseEntity
         T Entity = JsonConvert.DeserializeObject<T>(RequestBody);
         return Entity;
     }
-    protected void OutputStream(HttpListenerContext context, string json)
+    protected void OutputStream(HttpListenerContext context, string json, int status)
     {
         var response = context.Response;
-         byte[] data = Encoding.UTF8.GetBytes(json);
+        byte[] data;
+        switch (status)
+        {
+            case 204:
+                response.ContentLength64 = 0;
+                data = new byte[0];
+                break;
+            case 400:
+                data = Encoding.UTF8.GetBytes("BAD REQUEST");
+                response.ContentLength64 = data.Length;
+                break;
+            case 404:
+                data = Encoding.UTF8.GetBytes("NOT FOUND");
+                response.ContentLength64 = data.Length;
+                break;
+            case 500:
+                data = Encoding.UTF8.GetBytes("INTERNAL SERVER ERROR");
+                response.ContentLength64 = data.Length;
+                break;
+
+            default:
+                data = Encoding.UTF8.GetBytes(json);
+                response.ContentLength64 = data.Length;
+                break;
+        }
         response.ContentType = "application/json";
-        response.ContentLength64 = data.Length;
-        response.OutputStream.Write(data,0, data.Length);
+        response.StatusCode = status;
+
+        if (status != 204)
+        {
+            response.OutputStream.Write(data, 0, data.Length);
+        }
 
     }
 }

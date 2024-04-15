@@ -12,7 +12,7 @@ public static class Application
     {
         JourneyController journeyController = new JourneyController();
         HttpListenerContext context = httpListener.GetContext();
-        await HandleRequest(context);
+        HandleRequest(context);
         var requestUrl = context.Request.Url.AbsolutePath;
         if (requestUrl.StartsWith("/Journey"))
         {
@@ -22,9 +22,9 @@ public static class Application
             }
             else if (context.Request.HttpMethod == "GET" && Regex.IsMatch(requestUrl, @"^\/Journey\/\d+$"))
             {
-                if (int.TryParse(requestUrl.Split("/").Last(), out var index))
+                if (int.TryParse(requestUrl.Split("/").Last(), out int index))
                 {
-                    await journeyController.GetOne(context, index);
+                    journeyController.GetOne(context, index);
                 }
 
             }
@@ -32,9 +32,14 @@ public static class Application
             {
                 await journeyController.AddOne(context);
             }
+            else if(context.Request.HttpMethod == "DELETE"){
+                if(int.TryParse(requestUrl.Split("/").Last(), out int index)){
+                     journeyController.DeleteOne(context, index);
+                }
+            }
         }
     }
-    public static async Task HandleRequest(HttpListenerContext context)
+    public static void HandleRequest(HttpListenerContext context)
     {
         // Permitir solicitudes desde cualquier origen
         context.Response.AddHeader("Access-Control-Allow-Origin", "*");
@@ -49,7 +54,7 @@ public static class Application
     {
         HttpListener httpListener = new HttpListener();
         httpListener.Prefixes.Add("http://localhost:3002/");
-        
+        Console.WriteLine("Listening in the port 3002");
         httpListener.Start();
         while (true)
         {
