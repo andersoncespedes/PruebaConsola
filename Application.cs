@@ -1,5 +1,7 @@
 using System.Net;
+using System.Text;
 using System.Text.RegularExpressions;
+using System.Text.Unicode;
 using PruebaConsole.Configuration;
 using PruebaConsole.Controllers;
 
@@ -8,36 +10,58 @@ namespace PruebaConsole;
 public static class Application
 {
     private static readonly Conexion _conexion = Conexion.GetInstance();
-    private static async Task MapControllers(HttpListener httpListener)
+    private static readonly RateLimiter rateLimiter = new RateLimiter();
+    private static async Task SelectJorneyController(HttpListenerContext context, string requestUrl)
     {
         JourneyController journeyController = new JourneyController();
-        HttpListenerContext context = httpListener.GetContext();
-        HandleRequest(context);
-        var requestUrl = context.Request.Url.AbsolutePath;
-        if (requestUrl.StartsWith("/Journey"))
+        if (context.Request.HttpMethod == "GET" && !Regex.IsMatch(requestUrl, @"^\/Journey\/\d+$"))
         {
-            if (context.Request.HttpMethod == "GET" && !Regex.IsMatch(requestUrl, @"^\/Journey\/\d+$"))
+            await journeyController.ListAll(context);
+        }
+        else if (context.Request.HttpMethod == "GET" && Regex.IsMatch(requestUrl, @"^\/Journey\/\d+$"))
+        {
+            if (int.TryParse(requestUrl.Split("/").Last(), out int index))
             {
-                await journeyController.ListAll(context);
+                journeyController.GetOne(context, index);
             }
-            else if (context.Request.HttpMethod == "GET" && Regex.IsMatch(requestUrl, @"^\/Journey\/\d+$"))
-            {
-                if (int.TryParse(requestUrl.Split("/").Last(), out int index))
-                {
-                    journeyController.GetOne(context, index);
-                }
 
-            }
-            else if (context.Request.HttpMethod == "POST" && !Regex.IsMatch(requestUrl, @"^\/Journey\/\d+$"))
+        }
+        else if (context.Request.HttpMethod == "POST" && !Regex.IsMatch(requestUrl, @"^\/Journey\/\d+$"))
+        {
+            await journeyController.AddOne(context);
+        }
+        else if (context.Request.HttpMethod == "DELETE")
+        {
+            if (int.TryParse(requestUrl.Split("/").Last(), out int index))
             {
-                await journeyController.AddOne(context);
-            }
-            else if(context.Request.HttpMethod == "DELETE"){
-                if(int.TryParse(requestUrl.Split("/").Last(), out int index)){
-                     journeyController.DeleteOne(context, index);
-                }
+                journeyController.DeleteOne(context, index);
             }
         }
+    }
+    private static async void MapControllers(HttpListener httpListener)
+    {
+        HttpListenerContext context = httpListener.GetContext();
+        HandleRequest(context);
+        string hostName = Dns.GetHostName();
+        string ipEntry = Dns.GetHostEntry(hostName).AddressList.LastOrDefault().ToString();
+        string requestUrl = context.Request.Url.AbsolutePath;
+        if (rateLimiter.AllowRequest(ipEntry))
+        {
+            if (requestUrl.StartsWith("/Journey"))
+            {
+                await SelectJorneyController(context, requestUrl);
+            }
+        }
+        else
+        {
+            HttpListenerResponse response = context.Response;
+            response.ContentType = "application/json";
+            response.StatusCode = 429;
+            byte[] data = Encoding.UTF8.GetBytes("TOO MANY REQUEST");
+            response.ContentLength64 = data.Length;
+            response.OutputStream.Write(data, 0, data.Length);
+        }
+
     }
     public static void HandleRequest(HttpListenerContext context)
     {
@@ -50,7 +74,7 @@ public static class Application
 
         // Tu lógica de manejo de solicitud aquí
     }
-    public static async Task Run()
+    public static void Run()
     {
         HttpListener httpListener = new HttpListener();
         httpListener.Prefixes.Add("http://localhost:3002/");
@@ -58,7 +82,7 @@ public static class Application
         httpListener.Start();
         while (true)
         {
-            await MapControllers(httpListener);
+            MapControllers(httpListener);
         }
     }
 }
