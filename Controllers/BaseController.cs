@@ -1,5 +1,4 @@
 
-using System;
 using System.Net;
 using System.Text;
 using Newtonsoft.Json;
@@ -52,11 +51,7 @@ public class BaseController<T> where T : BaseEntity
         }
         response.ContentType = "application/json";
         response.StatusCode = status;
-
-        if (status != 204)
-        {
-            response.OutputStream.Write(data, 0, data.Length);
-        }
+        response.OutputStream.Write(data, 0, data.Length);
 
     }
 }

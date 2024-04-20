@@ -11,7 +11,7 @@ public class Conexion
     private readonly string User = "Anderson\\sa";
     private readonly string Password = "123456";
     private readonly string TrustConection = "True";
-    private readonly string ConexionString = "Server=Anderson-pc\\ANDERSON;Database=ColombiaTravel;User Id=Anderson\\sa;Password=123456;Trusted_Connection=True;";
+    private readonly string ConexionString;
     public static Conexion GetInstance(){
         lock(_lock){
             if(_conexion == null){
