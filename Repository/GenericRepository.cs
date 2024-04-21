@@ -7,7 +7,7 @@ using PruebaConsole.Interface;
 namespace PruebaConsole.Repository;
 public class GenericRepository<T> : IGenericRepository<T> where T : BaseEntity
 {
-    Conexion conexion = Conexion.GetInstance();
+    protected Conexion conexion = Conexion.GetInstance();
     protected T _entity;
     protected Type _type;
     protected PropertyInfo[] _propertyInfos;

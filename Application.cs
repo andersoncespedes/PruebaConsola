@@ -14,7 +14,8 @@ public static class Application
     private static async Task SelectJorneyController(HttpListenerContext context, string requestUrl)
     {
         JourneyController journeyController = new JourneyController();
-        if (context.Request.HttpMethod == "GET" && !Regex.IsMatch(requestUrl, @"^\/Journey\/\d+$"))
+        Console.WriteLine(requestUrl.Split("/").Last());
+        if (context.Request.HttpMethod == "GET" && requestUrl.Split("/").Last() == "Journey" )
         {
             await journeyController.ListAll(context);
         }
@@ -37,13 +38,22 @@ public static class Application
                 journeyController.DeleteOne(context, index);
             }
         }
+        else if(context.Request.HttpMethod == "GET" && requestUrl.Split("/").Last() == "flight"){
+            journeyController.GetOnlyOrigin(context);
+        }else{
+            HttpListenerResponse response = context.Response;
+            response.ContentType = "application/json";
+            response.StatusCode = 404;
+            byte[] data = Encoding.UTF8.GetBytes("NOT FOUND");
+            response.ContentLength64 = data.Length;
+            response.OutputStream.Write(data, 0, data.Length);
+        }
     }
     private static async void MapControllers(HttpListener httpListener)
     {
         HttpListenerContext context = httpListener.GetContext();
         HandleRequest(context);
-        string hostName = Dns.GetHostName();
-        string ipEntry = Dns.GetHostEntry(hostName).AddressList.LastOrDefault().ToString();
+        string ipEntry = context.Request.RemoteEndPoint.Address.ToString();
         string requestUrl = context.Request.Url.AbsolutePath;
         if (rateLimiter.AllowRequest(ipEntry))
         {

@@ -1,8 +1,10 @@
+using System.Collections.Generic;
 using Newtonsoft.Json;
 using System.Net;
 
 using PruebaConsole.Interface;
 using PruebaConsole.Entity;
+using PruebaConsole.Dto;
 namespace PruebaConsole.Controllers;
 public class JourneyController : BaseController<Journies>
 {
@@ -57,6 +59,10 @@ public class JourneyController : BaseController<Journies>
             string json = JsonConvert.SerializeObject(jounerney);
             OutputStream(context, json, 204);
         }
-
+    }
+    public async void GetOnlyOrigin(HttpListenerContext context){
+        HashSet<JourneyDto> journies = await _unitOfWork.journeyRepository.GetWithFlights();
+        string json = JsonConvert.SerializeObject(journies);
+        OutputStream(context, json, 200);
     }
 }
