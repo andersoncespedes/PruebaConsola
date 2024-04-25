@@ -36,7 +36,7 @@ public class BaseController<T> where T : BaseEntity
                 response.ContentLength64 = data.Length;
                 break;
             case 404:
-                data = Encoding.UTF8.GetBytes("NOT FOUND");
+                data = Encoding.UTF8.GetBytes(json);
                 response.ContentLength64 = data.Length;
                 break;
             case 500:

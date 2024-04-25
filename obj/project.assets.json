@@ -519,11 +519,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "c:\\Users\\ander\\OneDrive\\Documentos\\Proyectos C#\\PruebaConsole\\PruebaConsole.csproj",
+      "projectUniqueName": "C:\\Users\\ander\\OneDrive\\Documentos\\Proyectos C#\\PruebaConsole\\PruebaConsole.csproj",
       "projectName": "PruebaConsole",
-      "projectPath": "c:\\Users\\ander\\OneDrive\\Documentos\\Proyectos C#\\PruebaConsole\\PruebaConsole.csproj",
+      "projectPath": "C:\\Users\\ander\\OneDrive\\Documentos\\Proyectos C#\\PruebaConsole\\PruebaConsole.csproj",
       "packagesPath": "C:\\Users\\ander\\.nuget\\packages\\",
-      "outputPath": "c:\\Users\\ander\\OneDrive\\Documentos\\Proyectos C#\\PruebaConsole\\obj\\",
+      "outputPath": "C:\\Users\\ander\\OneDrive\\Documentos\\Proyectos C#\\PruebaConsole\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\ander\\AppData\\Roaming\\NuGet\\NuGet.Config"
@@ -580,7 +580,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.204/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.202/PortableRuntimeIdentifierGraph.json"
       }
     }
   }

@@ -11,11 +11,28 @@ public static class Application
 {
     private static readonly Conexion _conexion = Conexion.GetInstance();
     private static readonly RateLimiter rateLimiter = new RateLimiter();
+    private static async Task SelectFlightController(HttpListenerContext context, string requestUrl)
+    {
+        FlightController flightController = new FlightController();
+        Console.WriteLine(requestUrl.Split("/").Last());
+
+        if (context.Request.HttpMethod == "GET" && requestUrl.Split("/").Last() == "Flights")
+        {
+            await flightController.GetAll(context);
+        }
+        else if (context.Request.HttpMethod == "GET" && Regex.IsMatch(requestUrl, @"^\/Flights\[/]?$"))
+        {
+            if (int.TryParse(requestUrl.Split("/").Last(), out int id))
+            {
+                flightController.GetOne(context, id);
+            }
+        }
+    }
     private static async Task SelectJorneyController(HttpListenerContext context, string requestUrl)
     {
         JourneyController journeyController = new JourneyController();
         Console.WriteLine(requestUrl.Split("/").Last());
-        if (context.Request.HttpMethod == "GET" && requestUrl.Split("/").Last() == "Journey" )
+        if (context.Request.HttpMethod == "GET" && requestUrl.Split("/").Last() == "Journey" || requestUrl.Split("/").Last() == string.Empty )
         {
             await journeyController.ListAll(context);
         }
@@ -38,9 +55,12 @@ public static class Application
                 journeyController.DeleteOne(context, index);
             }
         }
-        else if(context.Request.HttpMethod == "GET" && requestUrl.Split("/").Last() == "flight"){
+        else if (context.Request.HttpMethod == "GET" && requestUrl.Split("/").Last() == "flight")
+        {
             journeyController.GetOnlyOrigin(context);
-        }else{
+        }
+        else
+        {
             HttpListenerResponse response = context.Response;
             response.ContentType = "application/json";
             response.StatusCode = 404;
@@ -55,11 +75,29 @@ public static class Application
         HandleRequest(context);
         string ipEntry = context.Request.RemoteEndPoint.Address.ToString();
         string requestUrl = context.Request.Url.AbsolutePath;
+        var responsable = context.Response;
+        Timer timer = new(state =>
+        {
+            responsable.Abort();
+        }, null,3000,  Timeout.Infinite);
         if (rateLimiter.AllowRequest(ipEntry))
         {
             if (requestUrl.StartsWith("/Journey"))
             {
                 await SelectJorneyController(context, requestUrl);
+            }
+            else if (requestUrl.StartsWith("/Flights"))
+            {
+                await SelectFlightController(context, requestUrl);
+            }
+            else
+            {
+                HttpListenerResponse response = context.Response;
+                response.ContentType = "application/json";
+                response.StatusCode = 404;
+                byte[] data = Encoding.UTF8.GetBytes("NOT FOUND");
+                response.ContentLength64 = data.Length;
+                response.OutputStream.Write(data, 0, data.Length);
             }
         }
         else
