@@ -1,8 +1,5 @@
 
-using System.Diagnostics;
-using System.Collections.Generic;
 using System.Data.SqlClient;
-using System.Reflection;
 using PruebaConsole.Dto;
 using PruebaConsole.Entity;
 using PruebaConsole.Interface;
@@ -16,7 +13,6 @@ public class JourneyRepository : GenericRepository<Journies>, IJourneyRepository
     }
     public override Journies GetOne(int id)
     {
-        Console.WriteLine("Epales panase");
         return base.GetOne(id);
     }
     public async Task<HashSet<JourneyDto>> GetWithFlights()
@@ -38,7 +34,6 @@ public class JourneyRepository : GenericRepository<Journies>, IJourneyRepository
                     FlightDto flight = new();
                     JourneyDto journy = new();
                     flight.Id = reader.GetInt32(3);
-                    Console.WriteLine(reader.GetString(4));
                     flight.Destination = reader.GetString(5);
                     flight.Origin = reader.GetString(4);
                     if (journies.Any(e => e.Id == reader.GetInt32(0)))

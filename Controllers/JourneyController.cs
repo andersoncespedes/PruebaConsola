@@ -24,7 +24,7 @@ public class JourneyController : BaseController<Journies>
         Journies journies = _unitOfWork.journeyRepository.GetOne(id);
         if (journies.Origin == null)
         {
-            OutputStream(context, "", 500);
+            OutputStream(context, "NOT FOUND", 404);
         }
         else
         {
@@ -60,7 +60,8 @@ public class JourneyController : BaseController<Journies>
             OutputStream(context, json, 204);
         }
     }
-    public async void GetOnlyOrigin(HttpListenerContext context){
+    public async void GetOnlyOrigin(HttpListenerContext context)
+    {
         HashSet<JourneyDto> journies = await _unitOfWork.journeyRepository.GetWithFlights();
         string json = JsonConvert.SerializeObject(journies);
         OutputStream(context, json, 200);

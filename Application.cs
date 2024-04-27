@@ -4,6 +4,7 @@ using System.Text.RegularExpressions;
 using System.Text.Unicode;
 using PruebaConsole.Configuration;
 using PruebaConsole.Controllers;
+using PruebaConsole.Routes;
 
 namespace PruebaConsole;
 
@@ -11,64 +12,6 @@ public static class Application
 {
     private static readonly Conexion _conexion = Conexion.GetInstance();
     private static readonly RateLimiter rateLimiter = new RateLimiter();
-    private static async Task SelectFlightController(HttpListenerContext context, string requestUrl)
-    {
-        FlightController flightController = new FlightController();
-        Console.WriteLine(requestUrl.Split("/").Last());
-
-        if (context.Request.HttpMethod == "GET" && requestUrl.Split("/").Last() == "Flights")
-        {
-            await flightController.GetAll(context);
-        }
-        else if (context.Request.HttpMethod == "GET" && Regex.IsMatch(requestUrl, @"^\/Flights\[/]?$"))
-        {
-            if (int.TryParse(requestUrl.Split("/").Last(), out int id))
-            {
-                flightController.GetOne(context, id);
-            }
-        }
-    }
-    private static async Task SelectJorneyController(HttpListenerContext context, string requestUrl)
-    {
-        JourneyController journeyController = new JourneyController();
-        Console.WriteLine(requestUrl.Split("/").Last());
-        if (context.Request.HttpMethod == "GET" && requestUrl.Split("/").Last() == "Journey" || requestUrl.Split("/").Last() == string.Empty )
-        {
-            await journeyController.ListAll(context);
-        }
-        else if (context.Request.HttpMethod == "GET" && Regex.IsMatch(requestUrl, @"^\/Journey\/\d+$"))
-        {
-            if (int.TryParse(requestUrl.Split("/").Last(), out int index))
-            {
-                journeyController.GetOne(context, index);
-            }
-
-        }
-        else if (context.Request.HttpMethod == "POST" && !Regex.IsMatch(requestUrl, @"^\/Journey\/\d+$"))
-        {
-            await journeyController.AddOne(context);
-        }
-        else if (context.Request.HttpMethod == "DELETE")
-        {
-            if (int.TryParse(requestUrl.Split("/").Last(), out int index))
-            {
-                journeyController.DeleteOne(context, index);
-            }
-        }
-        else if (context.Request.HttpMethod == "GET" && requestUrl.Split("/").Last() == "flight")
-        {
-            journeyController.GetOnlyOrigin(context);
-        }
-        else
-        {
-            HttpListenerResponse response = context.Response;
-            response.ContentType = "application/json";
-            response.StatusCode = 404;
-            byte[] data = Encoding.UTF8.GetBytes("NOT FOUND");
-            response.ContentLength64 = data.Length;
-            response.OutputStream.Write(data, 0, data.Length);
-        }
-    }
     private static async void MapControllers(HttpListener httpListener)
     {
         HttpListenerContext context = httpListener.GetContext();
@@ -79,16 +22,16 @@ public static class Application
         Timer timer = new(state =>
         {
             responsable.Abort();
-        }, null,3000,  Timeout.Infinite);
+        }, null, 3000, Timeout.Infinite);
         if (rateLimiter.AllowRequest(ipEntry))
         {
             if (requestUrl.StartsWith("/Journey"))
             {
-                await SelectJorneyController(context, requestUrl);
+                await JourneyRoute.SelectRoute(context, requestUrl);
             }
             else if (requestUrl.StartsWith("/Flights"))
             {
-                await SelectFlightController(context, requestUrl);
+                await FlightRoute.SelectRoute(context, requestUrl);
             }
             else
             {

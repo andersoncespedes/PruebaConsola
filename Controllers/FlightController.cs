@@ -1,12 +1,7 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
-using System.Threading.Tasks;
 using Newtonsoft.Json;
 using PruebaConsole.Entity;
 using PruebaConsole.Interface;
-using PruebaConsole.UnitOfWork;
 
 namespace PruebaConsole.Controllers;
 public class FlightController : BaseController<Flights>
@@ -26,7 +21,30 @@ public class FlightController : BaseController<Flights>
             OutputStream(context, "No Se Encontro el Flight", 404);
         }
         else{
-            OutputStream(context,JsonConvert.SerializeObject(  finded), 200);
+            OutputStream(context,JsonConvert.SerializeObject(finded), 200);
+        }
+    }
+    public async Task AddOne(HttpListenerContext context){
+       Flights flights = await GetBody(context);
+       if(flights == null){
+            OutputStream(context, "No Se Pudo obtener los datos", 400);
+       }
+       else{
+        _unitOfWork.flightRepository.Add(flights);
+        string json = JsonConvert.SerializeObject(flights);
+        OutputStream(context, json, 201);
+       }
+    }
+    public void DeleteOne(HttpListenerContext context, int id)
+    {
+        Flights flights = _unitOfWork.flightRepository.GetOne(id);
+        if(flights.Origin == null)
+        {
+            OutputStream(context, "NOT FOUND", 404);
+        }
+        else{
+            _unitOfWork.flightRepository.DeleteOne(id);
+            OutputStream(context, "", 203);
         }
     }
 }
