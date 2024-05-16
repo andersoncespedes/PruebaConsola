@@ -36,5 +36,9 @@ public static class FlightRoute
                 flightController.DeleteOne(context, id);
             }
         }
+        else if(context.Request.HttpMethod == "GET" && requestUrl.Split("/").Last().ToUpper() == "getwithoutl".ToUpper())
+        {
+            flightController.GetOneWithoutL(context);
+        }
     }
 }

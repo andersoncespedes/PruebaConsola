@@ -47,4 +47,12 @@ public class FlightController : BaseController<Flights>
             OutputStream(context, "", 203);
         }
     }
+    public void GetOneWithoutL(HttpListenerContext context){
+        Flights flights = _unitOfWork.flightRepository.GetOneWithoutL();
+        if(flights.Origin == null){
+            OutputStream(context, "NOT FOUND", 404);
+        }
+        string json = JsonConvert.SerializeObject(flights);
+        OutputStream(context, json,200 );
+    }
 }
