@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using PruebaConsole.Controllers;
 
 namespace PruebaConsole.Routes;
-public static class FlightRoute
+public static partial class FlightRoute
 {
     public static async Task SelectRoute(HttpListenerContext context, string requestUrl)
     {
@@ -25,7 +25,7 @@ public static class FlightRoute
                 flightController.GetOne(context, id);
             }
         }
-        else if (context.Request.HttpMethod == "POST" && requestUrl.Split("/").Last() == "Flights")
+        else if (context.Request.HttpMethod == "POST" && !MyRegex().IsMatch(requestUrl))
         {
             await flightController.AddOne(context);
         }
@@ -41,4 +41,7 @@ public static class FlightRoute
             flightController.GetOneWithoutL(context);
         }
     }
+
+    [GeneratedRegex(@"^\/Flights\/\d+$")]
+    private static partial Regex MyRegex();
 }
