@@ -44,7 +44,7 @@ public class FlightController : BaseController<Flights>
         }
         else{
             _unitOfWork.flightRepository.DeleteOne(id);
-            OutputStream(context, "", 203);
+            OutputStream(context, "", 202);
         }
     }
     public void GetOneWithoutL(HttpListenerContext context){

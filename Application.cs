@@ -14,8 +14,8 @@ public static class Application
     private static readonly RateLimiter rateLimiter = new RateLimiter();
     private static async void MapControllers(HttpListener httpListener)
     {
-        HttpListenerContext context = httpListener.GetContext();
-        HandleRequest(context);
+        HttpListenerContext context = HandleRequest(httpListener.GetContext());
+        
         string ipEntry = context.Request.RemoteEndPoint.Address.ToString();
         string requestUrl = context.Request.Url.AbsolutePath;
         var responsable = context.Response;
@@ -54,7 +54,7 @@ public static class Application
         }
 
     }
-    public static void HandleRequest(HttpListenerContext context)
+    public static HttpListenerContext HandleRequest(HttpListenerContext context)
     {
         // Permitir solicitudes desde cualquier origen
         context.Response.AddHeader("Access-Control-Allow-Origin", "*");
@@ -62,7 +62,7 @@ public static class Application
         context.Response.AddHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
         // Permitir los encabezados Content-Type y Authorization
         context.Response.AddHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
-
+        return context;
         // Tu lógica de manejo de solicitud aquí
     }
     public static void Run()
