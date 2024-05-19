@@ -45,6 +45,12 @@ public static partial class FlightRoute
         {
             flightController.GetOneWithoutL(context);
         }
+        else if(context.Request.HttpMethod == "PUT" && MyRegex().IsMatch(requestUrl))
+        {
+            if(int.TryParse(requestUrl.Split("/").Last(), out int id)){
+                await flightController.UpdateOne(context, id);
+            }
+        }
     }
 
     [GeneratedRegex(@"^\/Flights\/\d+$")]
