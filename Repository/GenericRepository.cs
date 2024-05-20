@@ -17,7 +17,7 @@ public class GenericRepository<T> : IGenericRepository<T> where T : BaseEntity
         _type = _entity.GetType();
         _propertyInfos = _type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
     }
-    public virtual async  Task<List<T>> List()
+    public virtual async Task<List<T>> List()
     {
         SqlConnection a = conexion.StablishConexion();
         List<T> values = new();
@@ -50,6 +50,8 @@ public class GenericRepository<T> : IGenericRepository<T> where T : BaseEntity
         using (SqlCommand command = new("SELECT " + String.Join(", ", _propertyInfos.Select(e => e.Name)) +
         " FROM " + _type.Name + " WHERE Id = '" + id + "'", connection))
         {
+            Console.WriteLine(command);
+
             foreach (PropertyInfo propert in _propertyInfos)
             {
                 command.Parameters.AddWithValue(propert.Name, propert.Name);
@@ -96,6 +98,8 @@ public class GenericRepository<T> : IGenericRepository<T> where T : BaseEntity
         {
             SqlConnection sqlConnection = conexion.StablishConexion();
             string Consulta = $"DELETE FROM {_type.Name} WHERE id = {id}";
+            Console.WriteLine(Consulta);
+
             using (SqlCommand command = new SqlCommand(Consulta, sqlConnection))
             {
                 command.ExecuteNonQuery();
@@ -121,7 +125,25 @@ public class GenericRepository<T> : IGenericRepository<T> where T : BaseEntity
             }
             command.ExecuteNonQuery();
         }
-            conexion.DisableConecction(con);
+        conexion.DisableConecction(con);
 
+    }
+
+    public async Task<int> GetCount()
+    {
+        SqlConnection connection = conexion.StablishConexion();
+        string query = $"SELECT COUNT(Id) AS Cantidad FROM {_type.Name}";
+        int count;
+        Console.WriteLine(query);
+        using(SqlCommand command = new(query, connection)){
+            using(SqlDataReader reader = await command.ExecuteReaderAsync()){
+                while (reader.Read()){
+                    count = reader.GetInt32(0);
+                    return count;
+                }
+                
+            }
+        }
+        return 0;
     }
 }

@@ -8,5 +8,6 @@ public interface IGenericRepository<T> where T : BaseEntity
     T GetOne(int id);
     void Add(T Entity);
     void DeleteOne(int id);
-    void Update( T Entity);
+    void Update(T Entity);
+    Task<int> GetCount();
 }

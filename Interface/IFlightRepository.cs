@@ -6,4 +6,5 @@ public interface IFlightRepository : IGenericRepository<Flights>
 {
     IEnumerable<Flights> GetWithoutG();
     Flights GetOneWithoutL();
+    
 }

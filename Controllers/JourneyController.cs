@@ -66,4 +66,17 @@ public class JourneyController : BaseController<Journies>
         string json = JsonConvert.SerializeObject(journies);
         OutputStream(context, json, 200);
     }
+    public async void GetCounts(HttpListenerContext context){
+        int countJourney = await _unitOfWork.journeyRepository.GetCount();
+        int countFlight = await _unitOfWork.flightRepository.GetCount();
+        int countTransport = await _unitOfWork.transportRepository.GetCount();
+        DbCountDto dbCountDto = new DbCountDto()
+        {
+            JourneyCount = countJourney,
+            FlightCount = countFlight,
+            TransportCount = countTransport
+        };
+        string json = JsonConvert.SerializeObject(dbCountDto);
+        OutputStream(context, json, 200);
+    }
 }

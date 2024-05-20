@@ -12,6 +12,7 @@ public class UnitOfWork : IUnitOfWork
     private static IUnitOfWork _unitOfWork;
     private IJourneyRepository _journey;
     private IFlightRepository _flight;
+    private ITransportRepository _transport;
     public UnitOfWork(){}
     public static IUnitOfWork GetInstance(){
         lock (_lock){
@@ -30,6 +31,12 @@ public class UnitOfWork : IUnitOfWork
         get{
             _flight ??= new FlightRepository();
             return _flight;
+        }
+    }
+     public ITransportRepository transportRepository {
+        get{
+            _transport ??= new TransportRepository();
+            return _transport;
         }
     }
 }

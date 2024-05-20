@@ -9,5 +9,6 @@ public interface IUnitOfWork
     
     public IJourneyRepository journeyRepository { get; }
     public IFlightRepository flightRepository { get; }
+    ITransportRepository transportRepository { get; }
     static IUnitOfWork GetInstance() => null;
 }

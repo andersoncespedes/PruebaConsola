@@ -13,7 +13,7 @@ public class RateLimiter
     private readonly Timer _timer;
     public RateLimiter()
     {
-        _maxRequest = 3;
+        _maxRequest = 10;
         _perInterval = TimeSpan.FromSeconds(10);
         _timer = new Timer(ResetCounts, null, _perInterval, _perInterval);
     }

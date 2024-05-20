@@ -37,6 +37,11 @@ public static class JourneyRoute
         {
             journeyController.GetOnlyOrigin(context);
         }
+        else if(context.Request.HttpMethod == "GET" && requestUrl.Split("/").Last().ToUpper() == "COUNT" )
+        {
+            journeyController.GetCounts(context);
+
+        }
         else
         {
             HttpListenerResponse response = context.Response;

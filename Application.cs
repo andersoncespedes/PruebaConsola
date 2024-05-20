@@ -15,7 +15,7 @@ public static class Application
     private static async void MapControllers(HttpListener httpListener)
     {
         HttpListenerContext context = HandleRequest(httpListener.GetContext());
-        
+
         string ipEntry = context.Request.RemoteEndPoint.Address.ToString();
         string requestUrl = context.Request.Url.AbsolutePath;
         var responsable = context.Response;
@@ -32,6 +32,10 @@ public static class Application
             else if (requestUrl.StartsWith("/Flights"))
             {
                 await FlightRoute.SelectRoute(context, requestUrl);
+            }
+            else if(requestUrl.StartsWith("/Transports"))
+            {
+                await TransportRoute.SelectRoute(context, requestUrl);
             }
             else
             {
