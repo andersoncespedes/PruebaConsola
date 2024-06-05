@@ -5,6 +5,7 @@ using System.Net;
 using PruebaConsole.Interface;
 using PruebaConsole.Entity;
 using PruebaConsole.Dto;
+
 namespace PruebaConsole.Controllers;
 public class JourneyController : BaseController<Journies>
 {
@@ -79,4 +80,11 @@ public class JourneyController : BaseController<Journies>
         string json = JsonConvert.SerializeObject(dbCountDto);
         OutputStream(context, json, 200);
     }
+    public async void GetWithoutFlights(HttpListenerContext context){
+        FlightsEntryDto jo = await this.GetDintinctBody<FlightsEntryDto>(context);
+        List<JourneyDto> jounerney = await _unitOfWork.journeyRepository.GetWithFlightsExcept(jo.flights);
+        string json = JsonConvert.SerializeObject(jounerney);
+        OutputStream(context, json, 200);
+    }
+    
 }

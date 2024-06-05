@@ -51,4 +51,23 @@ public class FlightRepository : GenericRepository<Flights>, IFlightRepository
         }
         return flights;
     }
+
+    public double GetAmount()
+    {
+        SqlConnection connection = conexion.StablishConexion();
+        string query = "SELECT SUM(Price) as precioTotal FROM Flights";
+        double price;
+        using(SqlCommand command = new SqlCommand(query,connection)){
+            using(SqlDataReader reader = command.ExecuteReader()){
+                while(reader.Read())
+                {
+                    price = reader.GetDouble(0);
+                    return price;
+                } 
+                
+            }
+        }
+        return 0;
+       
+    }
 }

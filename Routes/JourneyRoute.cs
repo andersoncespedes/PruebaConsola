@@ -10,11 +10,11 @@ public static class JourneyRoute
     public static async Task SelectRoute(HttpListenerContext context, string requestUrl)
     {
          JourneyController journeyController = new JourneyController();
-        if (context.Request.HttpMethod == "GET" && requestUrl.Split("/").Last() == "Journey" || requestUrl.Split("/").Last() == string.Empty)
+        if (context.Request.HttpMethod == "GET" && requestUrl.Split("/").Last() == "journey" || requestUrl.Split("/").Last() == string.Empty)
         {
             await journeyController.ListAll(context);
         }
-        else if (context.Request.HttpMethod == "GET" && Regex.IsMatch(requestUrl, @"^\/Journey\/\d+$"))
+        else if (context.Request.HttpMethod == "GET" && Regex.IsMatch(requestUrl, @"^\/journey\/\d+$"))
         {
             if (int.TryParse(requestUrl.Split("/").Last(), out int index))
             {
@@ -22,7 +22,7 @@ public static class JourneyRoute
             }
 
         }
-        else if (context.Request.HttpMethod == "POST" && !Regex.IsMatch(requestUrl, @"^\/Journey\/\d+$"))
+        else if (context.Request.HttpMethod == "POST" && !Regex.IsMatch(requestUrl, @"^\/journey\/\d+$"))
         {
             await journeyController.AddOne(context);
         }
@@ -40,6 +40,11 @@ public static class JourneyRoute
         else if(context.Request.HttpMethod == "GET" && requestUrl.Split("/").Last().ToUpper() == "COUNT" )
         {
             journeyController.GetCounts(context);
+
+        }
+         else if(context.Request.HttpMethod == "GET" && requestUrl.Split("/").Last().ToUpper() == "EXCEPT" )
+        {
+            journeyController.GetWithoutFlights(context);
 
         }
         else

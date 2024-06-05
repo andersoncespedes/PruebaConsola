@@ -85,4 +85,9 @@ public class FlightController : BaseController<Flights>
         string json = JsonConvert.SerializeObject(flights);
         OutputStream(context, json, 200);
     }
+    public void GetTotal(HttpListenerContext context)
+    {
+        double total =  _unitOfWork.flightRepository.GetAmount();
+        OutputStream(context, total.ToString(), 200);
+    }
 }

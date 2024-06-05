@@ -17,7 +17,8 @@ public static class Application
         HttpListenerContext context = HandleRequest(httpListener.GetContext());
 
         string ipEntry = context.Request.RemoteEndPoint.Address.ToString();
-        string requestUrl = context.Request.Url.AbsolutePath;
+        string requestUrl = String.Join("/",context.Request.Url.AbsolutePath.Split("/").Select(e => e.Replace("%20", ""))).ToLower();
+        Console.WriteLine(requestUrl);
         var responsable = context.Response;
         Timer timer = new(state =>
         {
@@ -25,15 +26,15 @@ public static class Application
         }, null, 3000, Timeout.Infinite);
         if (rateLimiter.AllowRequest(ipEntry))
         {
-            if (requestUrl.StartsWith("/Journey"))
+            if (requestUrl.StartsWith("/journey"))
             {
                 await JourneyRoute.SelectRoute(context, requestUrl);
             }
-            else if (requestUrl.StartsWith("/Flights"))
+            else if (requestUrl.StartsWith("/flights"))
             {
                 await FlightRoute.SelectRoute(context, requestUrl);
             }
-            else if(requestUrl.StartsWith("/Transports"))
+            else if(requestUrl.StartsWith("/transports"))
             {
                 await TransportRoute.SelectRoute(context, requestUrl);
             }

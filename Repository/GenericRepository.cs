@@ -34,8 +34,10 @@ public class GenericRepository<T> : IGenericRepository<T> where T : BaseEntity
                 T Instance = Activator.CreateInstance<T>();
                 foreach (PropertyInfo property in _propertyInfos)
                 {
-
-                    property.SetValue(Instance, read[property.Name]);
+                    if (read[property.Name] != DBNull.Value)
+                    {
+                        property.SetValue(Instance, read[property.Name]);
+                    }
                 }
                 values.Add(Instance);
             }

@@ -18,11 +18,11 @@ public static partial class FlightRoute
             byte[] data = Encoding.UTF8.GetBytes("data");
              context.Response.OutputStream.Write(data, 0, "data".Length);
         }
-        if (context.Request.HttpMethod == "GET" && requestUrl.Split("/").Last() == "Flights")
+        if (context.Request.HttpMethod == "GET" && requestUrl.Split("/").Last() == "flights")
         {
             await flightController.GetAll(context);
         }
-        else if (context.Request.HttpMethod == "GET" && Regex.IsMatch(requestUrl, @"^\/Flights\/\d+$"))
+        else if (context.Request.HttpMethod == "GET" && Regex.IsMatch(requestUrl, @"^\/flights\/\d+$"))
         {
             if (int.TryParse(requestUrl.Split("/").Last(), out int id))
             {
@@ -51,9 +51,12 @@ public static partial class FlightRoute
                 await flightController.UpdateOne(context, id);
             }
         }
+        else if(context.Request.HttpMethod == "GET" &&  requestUrl.Split("/").Last().ToLower() == "amount"){
+            flightController.GetTotal(context);
+        }
     }
 
-    [GeneratedRegex(@"^\/Flights\/\d+$")]
+    [GeneratedRegex(@"^\/flights\/\d+$")]
     private static partial Regex MyRegex();
 
 }

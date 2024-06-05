@@ -21,6 +21,15 @@ public class BaseController<T> where T : BaseEntity
         T Entity = JsonConvert.DeserializeObject<T>(RequestBody);
         return Entity;
     }
+    protected async Task<J> GetDintinctBody<J>(HttpListenerContext context){
+        string RequestBody;
+        using (var reader = new StreamReader(context.Request.InputStream, context.Request.ContentEncoding))
+        {
+            RequestBody = await reader.ReadToEndAsync();
+        }
+        J Entity = JsonConvert.DeserializeObject<J>(RequestBody);
+        return Entity;
+    }
     protected void OutputStream(HttpListenerContext context, string json, int status)
     {
         var response = context.Response;

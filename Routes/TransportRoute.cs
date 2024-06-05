@@ -12,7 +12,7 @@ public static class TransportRoute
     {
         TransportController transportController = new TransportController();
         
-        if (context.Request.HttpMethod == "GET" && requestUrl.Split("/").Last() == "Transports" || requestUrl.Split("/").Last() == string.Empty)
+        if (context.Request.HttpMethod == "GET" && requestUrl.Split("/").Last() == "transports" || requestUrl.Split("/").Last() == string.Empty && context.Request.HttpMethod == "GET")
         {
             Console.WriteLine(requestUrl);
             await transportController.ListAll(context);
